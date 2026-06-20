@@ -1,0 +1,1165 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kaffee Lernapp – Von der Bohne zum Getränk</title>
+<style>
+  :root {
+    --espresso: #2C1810;
+    --roast: #6B3A2A;
+    --caramel: #C8873A;
+    --cream: #F5E6D3;
+    --milk: #FAF3EA;
+    --green: #4A7C59;
+    --text: #1A1A1A;
+    --muted: #6B6B6B;
+    --white: #FFFFFF;
+    --shadow: 0 2px 12px rgba(44,24,16,0.12);
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--milk);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--espresso) 0%, var(--roast) 100%);
+    color: var(--white);
+    padding: 2rem 2rem 1.5rem;
+    text-align: center;
+  }
+  header h1 { font-size: 2rem; letter-spacing: 0.04em; margin-bottom: 0.3rem; }
+  header p { color: var(--cream); font-size: 0.95rem; font-style: italic; }
+
+  /* NAV */
+  nav {
+    background: var(--espresso);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    justify-content: center;
+    padding: 0.4rem;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  nav button {
+    background: transparent;
+    border: none;
+    color: var(--cream);
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-family: inherit;
+    padding: 0.45rem 0.85rem;
+    border-radius: 20px;
+    transition: background 0.2s, color 0.2s;
+    white-space: nowrap;
+  }
+  nav button:hover, nav button.active {
+    background: var(--caramel);
+    color: var(--white);
+  }
+
+  /* LAYOUT */
+  main { max-width: 860px; margin: 0 auto; padding: 2rem 1.5rem 4rem; }
+
+  /* SECTION */
+  .section { display: none; animation: fadeIn 0.35s ease; }
+  .section.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.8rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--caramel);
+  }
+  .section-icon { font-size: 2.2rem; }
+  .section-header h2 { font-size: 1.6rem; color: var(--roast); }
+  .section-header .tag {
+    font-size: 0.7rem;
+    background: var(--green);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  /* CARDS */
+  .card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .card h3 { color: var(--roast); margin-bottom: 0.8rem; font-size: 1.1rem; }
+  .card p, .card li { line-height: 1.75; color: var(--text); font-size: 0.95rem; }
+  .card ul, .card ol { padding-left: 1.4rem; margin-top: 0.5rem; }
+  .card li { margin-bottom: 0.3rem; }
+
+  /* ADVANCED TOGGLE */
+  .advanced-tag {
+    display: inline-block;
+    background: var(--roast);
+    color: var(--cream);
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+  .advanced-content {
+    display: none;
+    background: #FDF4EB;
+    border-left: 3px solid var(--caramel);
+    padding: 1rem;
+    border-radius: 0 8px 8px 0;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+  }
+  .toggle-btn {
+    background: none;
+    border: 1px solid var(--caramel);
+    color: var(--caramel);
+    cursor: pointer;
+    font-size: 0.8rem;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-top: 0.8rem;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  .toggle-btn:hover { background: var(--caramel); color: white; }
+
+  /* SVG DIAGRAMS */
+  .diagram-wrap {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    overflow-x: auto;
+  }
+  .diagram-wrap h3 { color: var(--roast); margin-bottom: 1rem; font-size: 1.05rem; }
+  svg text { font-family: Georgia, serif; }
+
+  /* BREW STEPS */
+  .brew-steps { counter-reset: step; }
+  .brew-step {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    box-shadow: var(--shadow);
+  }
+  .brew-step::before {
+    counter-increment: step;
+    content: counter(step);
+    background: var(--caramel);
+    color: white;
+    font-weight: bold;
+    min-width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+  .brew-step p { font-size: 0.93rem; line-height: 1.6; padding-top: 0.25rem; }
+  .brew-step strong { color: var(--roast); }
+
+  /* QUIZ */
+  .quiz-container { }
+  .quiz-q {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 1.2rem;
+  }
+  .quiz-q p.question { font-weight: bold; margin-bottom: 1rem; font-size: 1rem; line-height: 1.5; }
+  .quiz-options { display: flex; flex-direction: column; gap: 0.5rem; }
+  .quiz-options button {
+    text-align: left;
+    background: var(--milk);
+    border: 1.5px solid #e0d0c0;
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+  .quiz-options button:hover { border-color: var(--caramel); background: #FDF4EB; }
+  .quiz-options button.correct { background: #E8F5E9; border-color: #4CAF50; color: #1B5E20; }
+  .quiz-options button.wrong { background: #FFEBEE; border-color: #EF9A9A; color: #B71C1C; }
+  .quiz-options button:disabled { cursor: not-allowed; }
+  .quiz-feedback {
+    margin-top: 0.8rem;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    padding: 0.7rem 1rem;
+    border-radius: 8px;
+    display: none;
+  }
+  .quiz-feedback.show { display: block; }
+  .quiz-feedback.correct { background: #E8F5E9; color: #1B5E20; }
+  .quiz-feedback.wrong { background: #FFEBEE; color: #B71C1C; }
+  .quiz-score {
+    text-align: center;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--roast);
+    padding: 1rem;
+    background: var(--cream);
+    border-radius: var(--radius);
+    margin-top: 1rem;
+    display: none;
+  }
+  .quiz-btn {
+    background: var(--caramel);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.9rem;
+    margin-top: 1rem;
+    display: block;
+  }
+  .quiz-btn:hover { background: var(--roast); }
+
+  /* GLOSSAR */
+  .glossar-search {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    border: 1.5px solid #e0d0c0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    margin-bottom: 1.2rem;
+    background: var(--white);
+    color: var(--text);
+  }
+  .glossar-search:focus { outline: none; border-color: var(--caramel); }
+  .glossar-entry {
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 1rem 1.3rem;
+    margin-bottom: 0.8rem;
+    box-shadow: var(--shadow);
+    transition: display 0.2s;
+  }
+  .glossar-entry h4 { color: var(--roast); margin-bottom: 0.4rem; font-size: 1rem; }
+  .glossar-entry p { font-size: 0.88rem; line-height: 1.65; color: var(--muted); }
+  .glossar-entry.hidden { display: none; }
+
+  /* INFO BOX */
+  .info-box {
+    background: #E8F4F8;
+    border-left: 4px solid #1976D2;
+    padding: 1rem 1.2rem;
+    border-radius: 0 8px 8px 0;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: #0D47A1;
+  }
+
+  /* COMPARISON TABLE */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+    margin-top: 0.5rem;
+  }
+  th { background: var(--roast); color: white; padding: 0.6rem 0.8rem; text-align: left; }
+  td { padding: 0.55rem 0.8rem; border-bottom: 1px solid #EEE; vertical-align: top; }
+  tr:nth-child(even) td { background: var(--milk); }
+  tr:last-child td { border-bottom: none; }
+
+  /* PROGRESS */
+  .progress-bar-wrap { background: #e0d0c0; border-radius: 20px; height: 6px; margin-bottom: 2rem; }
+  .progress-bar { height: 6px; border-radius: 20px; background: var(--caramel); transition: width 0.4s; }
+
+  /* BADGE */
+  .badge {
+    display: inline-block;
+    background: var(--caramel);
+    color: white;
+    font-size: 0.72rem;
+    padding: 2px 9px;
+    border-radius: 20px;
+    margin-left: 0.4rem;
+    font-family: Arial, sans-serif;
+  }
+
+  /* ROAST METER */
+  .roast-scale {
+    display: flex;
+    height: 36px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 1rem 0 0.4rem;
+    font-size: 0.72rem;
+    color: white;
+    font-weight: bold;
+  }
+  .roast-scale div { display: flex; align-items: center; justify-content: center; flex: 1; }
+
+  @media (max-width: 600px) {
+    header h1 { font-size: 1.4rem; }
+    .section-header h2 { font-size: 1.2rem; }
+    nav button { font-size: 0.72rem; padding: 0.4rem 0.65rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>☕ Kaffee — Von der Bohne zum Getränk</h1>
+  <p>Wissenschaftliche Lernapp · progressiv aufgebaut · Einsteiger bis Fortgeschritten</p>
+</header>
+
+<nav id="main-nav">
+  <button onclick="showSection('pflanze')" class="active">🌱 Pflanze</button>
+  <button onclick="showSection('anbau')">🌍 Anbau & Ernte</button>
+  <button onclick="showSection('aufbereitung')">💧 Aufbereitung</button>
+  <button onclick="showSection('roestung')">🔥 Röstung</button>
+  <button onclick="showSection('extraktion')">⚗️ Extraktion</button>
+  <button onclick="showSection('zubereitung')">☕ Zubereitung</button>
+  <button onclick="showSection('quiz')">🧠 Quiz</button>
+  <button onclick="showSection('glossar')">📖 Glossar</button>
+</nav>
+
+<main>
+  <!-- FORTSCHRITT -->
+  <div class="progress-bar-wrap"><div class="progress-bar" id="progress" style="width:12%"></div></div>
+
+  <!-- ===== 1. PFLANZE ===== -->
+  <div class="section active" id="pflanze">
+    <div class="section-header">
+      <span class="section-icon">🌱</span>
+      <div><h2>Die Kaffeepflanze</h2></div>
+    </div>
+
+    <div class="card">
+      <h3>Botanik & Taxonomie</h3>
+      <p>Kaffee gehört zur Familie der <strong>Rubiaceae</strong> (Rötegewächse). Von den über 120 bekannten <em>Coffea</em>-Arten sind kommerziell vor allem zwei relevant:</p>
+      <ul style="margin-top:0.8rem">
+        <li><strong>Coffea arabica</strong> – ca. 60–70 % der Weltproduktion, komplex im Aroma</li>
+        <li><strong>Coffea canephora</strong> (Robusta) – ca. 30–40 %, höherer Koffeingehalt, kräftiger</li>
+        <li><strong>Coffea liberica</strong> – Nischenprodukt, hauptsächlich in Westafrika</li>
+      </ul>
+    </div>
+
+    <div class="diagram-wrap">
+      <h3>Arabica vs. Robusta — Vergleich</h3>
+      <table>
+        <tr><th>Merkmal</th><th>Arabica</th><th>Robusta</th></tr>
+        <tr><td>Chromosomen</td><td>44 (tetraploid)</td><td>22 (diploid)</td></tr>
+        <tr><td>Koffein</td><td>1,0–1,5 %</td><td>1,7–3,5 %</td></tr>
+        <tr><td>Zucker</td><td>6–9 %</td><td>3–7 %</td></tr>
+        <tr><td>Lipide</td><td>~16 %</td><td>~10 %</td></tr>
+        <tr><td>Anbauhöhe</td><td>600–2.200 m</td><td>0–800 m</td></tr>
+        <tr><td>Optimale Temp.</td><td>15–24 °C</td><td>24–30 °C</td></tr>
+        <tr><td>Aroma</td><td>Komplex, fruchtig, blumig</td><td>Erdig, bitter, holzig</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>Anatomie der Kaffeekirsche</h3>
+      <p>Die Kaffeefrucht — die <strong>Kaffeekirsche</strong> — enthält mehrere Schichten, die bei der Aufbereitung entfernt werden:</p>
+    </div>
+
+    <!-- SVG: Kaffeekirsche Querschnitt -->
+    <div class="diagram-wrap">
+      <h3>Querschnitt der Kaffeekirsche</h3>
+      <svg viewBox="0 0 500 320" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <!-- Outer skin (Exocarp) -->
+        <ellipse cx="250" cy="160" rx="130" ry="130" fill="#C0392B"/>
+        <!-- Pulp (Mesocarp) -->
+        <ellipse cx="250" cy="160" rx="115" ry="115" fill="#E8956D"/>
+        <!-- Mucilage -->
+        <ellipse cx="250" cy="160" rx="97" ry="97" fill="#F5C49A"/>
+        <!-- Parchment -->
+        <ellipse cx="250" cy="160" rx="83" ry="83" fill="#D4B483"/>
+        <!-- Silver skin -->
+        <ellipse cx="250" cy="160" rx="70" ry="70" fill="#C8A96E"/>
+        <!-- Bean left -->
+        <ellipse cx="233" cy="160" rx="40" ry="58" fill="#6B8C5A" transform="rotate(-5,233,160)"/>
+        <!-- Bean right -->
+        <ellipse cx="267" cy="160" rx="40" ry="58" fill="#5A7A4A" transform="rotate(5,267,160)"/>
+        <!-- Center line -->
+        <line x1="250" y1="104" x2="250" y2="216" stroke="#3A5A2A" stroke-width="1.5" stroke-dasharray="3"/>
+
+        <!-- Labels -->
+        <text x="395" y="80" fill="#C0392B" font-size="13" font-weight="bold">Exokarp</text>
+        <text x="395" y="96" fill="#888" font-size="11">(Schale/Skin)</text>
+        <line x1="378" y1="78" x2="342" y2="100" stroke="#C0392B" stroke-width="1"/>
+
+        <text x="395" y="130" fill="#D2691E" font-size="13" font-weight="bold">Mesokarp</text>
+        <text x="395" y="146" fill="#888" font-size="11">(Fruchtfleisch/Pulp)</text>
+        <line x1="378" y1="128" x2="340" y2="140" stroke="#D2691E" stroke-width="1"/>
+
+        <text x="395" y="176" fill="#A0785A" font-size="13" font-weight="bold">Mucilage</text>
+        <text x="395" y="192" fill="#888" font-size="11">(Schleim)</text>
+        <line x1="378" y1="174" x2="340" y2="168" stroke="#A0785A" stroke-width="1"/>
+
+        <text x="10" y="80" fill="#8B6914" font-size="13" font-weight="bold">Pergament</text>
+        <text x="10" y="96" fill="#888" font-size="11">(Endokarp)</text>
+        <line x1="118" y1="78" x2="182" y2="115" stroke="#8B6914" stroke-width="1"/>
+
+        <text x="20" y="176" fill="#3D7A3D" font-size="13" font-weight="bold">Kaffeebohne</text>
+        <text x="20" y="192" fill="#888" font-size="11">(Samen/Bean)</text>
+        <line x1="118" y1="180" x2="198" y2="168" stroke="#3D7A3D" stroke-width="1"/>
+
+        <text x="160" y="282" fill="#555" font-size="11" text-anchor="middle">Silberhäutchen (Silverskin)</text>
+        <line x1="160" y1="268" x2="218" y2="232" stroke="#888" stroke-width="1"/>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h3>Terroir & Herkunft</h3>
+      <p>Wie beim Wein beeinflusst das <strong>Terroir</strong> das Aroma der Bohne grundlegend:</p>
+      <ul style="margin-top:0.6rem">
+        <li><strong>Äthiopien</strong> – Heimat der Arabica-Wildform; blumig, Beeren, Jasmin</li>
+        <li><strong>Kolumbien</strong> – ausgewogen, Karamell, rote Früchte, Nuss</li>
+        <li><strong>Brasilien</strong> – mild, Schokolade, Nuss, niedriger Säuregehalt</li>
+        <li><strong>Kenia</strong> – kräftige Säure, Schwarze Johannisbeere, Zitrus</li>
+        <li><strong>Sumatra</strong> – voluminös, erdig, Kräuter, dunkle Früchte</li>
+        <li><strong>Jemen</strong> – Winelike, komplex, Trockenfrüchte</li>
+      </ul>
+      <button class="toggle-btn" onclick="toggleAdv(this)">🔬 Wissenschaftliche Tiefe zeigen</button>
+      <div class="advanced-content">
+        <strong>Terroir-Faktoren chemisch betrachtet:</strong><br>
+        Höhenlage beeinflusst die Reifedauer der Kirsche — höhere Lagen = langsamere Reife = komplexere Zuckerstruktur und höhere Chlorogensäure-Konzentration. Boden-pH-Wert (optimal 6–6,5) und Mineralzusammensetzung korrelieren mit Säureprofil und Körper. Vulkanische Böden (Hawaii, Guatemala, Sumatra) liefern hohe Mineraldichte und phosphatreiche Umgebungen, die das Aromapotential erhöhen.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 2. ANBAU & ERNTE ===== -->
+  <div class="section" id="anbau">
+    <div class="section-header">
+      <span class="section-icon">🌍</span>
+      <div><h2>Anbau & Ernte</h2></div>
+    </div>
+
+    <div class="card">
+      <h3>Der Kaffeegürtel</h3>
+      <p>Kaffee wächst ausschließlich im <strong>Kaffeegürtel</strong> zwischen dem 25. Breitengrad Nord und Süd. Entscheidend sind:</p>
+      <ul style="margin-top:0.6rem">
+        <li>Jahresdurchschnittstemp. 15–24 °C (Arabica)</li>
+        <li>Jährlicher Niederschlag 1.500–2.000 mm</li>
+        <li>Wechsel von Regen- und Trockenzeit für gleichmäßige Blüte</li>
+        <li>Keine starken Fröste (Arabica ist frostempfindlich)</li>
+      </ul>
+    </div>
+
+    <!-- SVG: Kaffeegürtel -->
+    <div class="diagram-wrap">
+      <h3>Der Kaffeegürtel (Coffee Belt)</h3>
+      <svg viewBox="0 0 600 220" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <rect width="600" height="220" fill="#D6EAF8" rx="10"/>
+        <!-- Simplified world outline zones -->
+        <rect x="0" y="78" width="600" height="64" fill="rgba(200,135,58,0.18)" rx="0"/>
+        <!-- Equator -->
+        <line x1="0" y1="110" x2="600" y2="110" stroke="#E74C3C" stroke-width="1" stroke-dasharray="6,3"/>
+        <!-- Tropic lines -->
+        <line x1="0" y1="78" x2="600" y2="78" stroke="#F39C12" stroke-width="1" stroke-dasharray="4,3"/>
+        <line x1="0" y1="142" x2="600" y2="142" stroke="#F39C12" stroke-width="1" stroke-dasharray="4,3"/>
+
+        <!-- Simplified continents (rough shapes) -->
+        <!-- Americas -->
+        <path d="M 80 60 Q 100 55 110 80 L 115 160 Q 100 175 85 155 L 70 90 Z" fill="#A8D5A2" opacity="0.8"/>
+        <path d="M 110 95 Q 130 85 140 110 L 145 165 Q 130 178 118 160 L 108 115 Z" fill="#A8D5A2" opacity="0.8"/>
+        <!-- Europe-Africa -->
+        <path d="M 250 30 Q 280 25 290 55 L 285 100 Q 270 95 255 95 L 245 55 Z" fill="#A8D5A2" opacity="0.8"/>
+        <path d="M 255 100 Q 290 98 295 130 L 290 175 Q 265 185 250 165 L 248 115 Z" fill="#A8D5A2" opacity="0.8"/>
+        <!-- Asia -->
+        <path d="M 350 35 Q 440 30 460 60 L 455 95 Q 420 100 360 98 L 345 65 Z" fill="#A8D5A2" opacity="0.8"/>
+        <!-- SE Asia -->
+        <path d="M 420 100 Q 460 95 470 125 L 465 155 Q 445 160 425 145 L 415 120 Z" fill="#A8D5A2" opacity="0.8"/>
+        <!-- Australia -->
+        <path d="M 460 130 Q 520 125 525 155 L 520 180 Q 490 185 465 170 L 455 148 Z" fill="#A8D5A2" opacity="0.8"/>
+
+        <!-- Coffee region highlights -->
+        <circle cx="115" cy="130" r="10" fill="#C8873A" opacity="0.7"/>
+        <circle cx="88" cy="118" r="9" fill="#C8873A" opacity="0.7"/>
+        <circle cx="265" cy="140" r="12" fill="#C8873A" opacity="0.7"/>
+        <circle cx="430" cy="115" r="9" fill="#C8873A" opacity="0.7"/>
+        <circle cx="450" cy="125" r="7" fill="#C8873A" opacity="0.7"/>
+
+        <!-- Labels -->
+        <text x="300" y="10" fill="#1A1A1A" font-size="12" text-anchor="middle" font-weight="bold">Kaffeegürtel — 25° N bis 25° S</text>
+        <text x="590" y="76" fill="#E67E22" font-size="10" text-anchor="end">25° N</text>
+        <text x="590" y="113" fill="#E74C3C" font-size="10" text-anchor="end">Äquator</text>
+        <text x="590" y="145" fill="#E67E22" font-size="10" text-anchor="end">25° S</text>
+        <text x="300" y="210" fill="#888" font-size="10" text-anchor="middle">🟠 = Hauptanbaugebiete</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h3>Erntemethoden</h3>
+      <p>Die Erntemethode beeinflusst Qualität und Kosten erheblich:</p>
+      <div style="overflow-x:auto;margin-top:0.8rem">
+        <table>
+          <tr><th>Methode</th><th>Vorgehen</th><th>Qualität</th><th>Einsatz</th></tr>
+          <tr><td><strong>Selective Picking</strong></td><td>Handpflücken reifer Kirschen</td><td>Höchste</td><td>Premium Arabica</td></tr>
+          <tr><td><strong>Strip Picking</strong></td><td>Alle Früchte eines Astes auf einmal</td><td>Gemischt</td><td>Robusta, Brasilien</td></tr>
+          <tr><td><strong>Machine Harvesting</strong></td><td>Rüttelmschinen, nur für ebene Flächen</td><td>Niedrig-mittel</td><td>Brasilien (Flachland)</td></tr>
+        </table>
+      </div>
+      <button class="toggle-btn" onclick="toggleAdv(this)">🔬 Wissenschaftliche Tiefe zeigen</button>
+      <div class="advanced-content">
+        <strong>Reifegrad & Zuckerentwicklung:</strong><br>
+        Während der Reifung steigt der Saccharosegehalt von ~2 % (grün) auf bis zu 9 % (vollreif, rot). Gleichzeitig bauen Pektine im Fruchtfleisch ab und Chlorogensäuren oxidieren. Der optimale Erntezeitpunkt ist kritisch: Unreife Kirschen enthalten mehr Quercitol und Trigonellin-Precursoren → grüne, holzige Fehlaromen nach der Röstung.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 3. AUFBEREITUNG ===== -->
+  <div class="section" id="aufbereitung">
+    <div class="section-header">
+      <span class="section-icon">💧</span>
+      <div><h2>Aufbereitung (Processing)</h2></div>
+    </div>
+
+    <div class="info-box">
+      💡 Die Aufbereitung bestimmt maßgeblich das spätere Aromaprofil der Rohbohne — noch vor der Röstung.
+    </div>
+
+    <div class="card">
+      <h3>Washed (Nass-Aufbereitung)</h3>
+      <p>Fruchtfleisch wird maschinell entfernt, Bohnen fermentieren 12–72 h in Wassertanks, dann gründlich gewaschen und getrocknet.</p>
+      <p style="margin-top:0.6rem"><strong>Resultat:</strong> Klares, sauberes Aromaprofil · helle Säure · präzise Fruchtigkeit · wenig Körper</p>
+      <p style="margin-top:0.4rem; color:var(--muted); font-size:0.88rem">Typisch für: Äthiopien (Yirgacheffe), Kenia, Kolumbien</p>
+      <button class="toggle-btn" onclick="toggleAdv(this)">🔬 Wissenschaftliche Tiefe zeigen</button>
+      <div class="advanced-content">
+        Während der Fermentation bauen Mikroorganismen (Hefen, Laktobazillen) Pektine der Mucilage ab. Dabei entstehen organische Säuren (Milchsäure, Essigsäure), Alkohole und Ester, die in die Bohne diffundieren. Die Fermentationsdauer und -temperatur kontrollieren die Säurebalance. Zu lange Fermentation → Überfermentationsdefekte (vinegary/saure Fehlaromen).
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Natural (Trocken-Aufbereitung)</h3>
+      <p>Ganze Kirschen werden auf Trockentischen oder Betonböden 3–6 Wochen in der Sonne getrocknet. Die Bohne fermentiert dabei <em>innerhalb</em> der Frucht.</p>
+      <p style="margin-top:0.6rem"><strong>Resultat:</strong> Intensiv fruchtig · Beerennoten · Wein-artig · hoher Körper · komplex</p>
+      <p style="margin-top:0.4rem; color:var(--muted); font-size:0.88rem">Typisch für: Äthiopien (Harar), Brasilien, Jemen</p>
+    </div>
+
+    <div class="card">
+      <h3>Honey Process (Halbwäsche)</h3>
+      <p>Fruchtfleisch wird entfernt, aber die klebrige Mucilage (<em>Honey</em>) bleibt teilweise oder ganz an der Bohne während der Trocknung.</p>
+      <p style="margin-top:0.6rem"><strong>Varianten:</strong> Yellow Honey (wenig Mucilage) · Red Honey · Black Honey (viel Mucilage, ähnelt Natural)</p>
+      <p style="margin-top:0.4rem; color:var(--muted); font-size:0.88rem">Typisch für: Costa Rica, El Salvador, Guatemala</p>
+    </div>
+
+    <!-- SVG: Aufbereitungsmethoden Flowchart -->
+    <div class="diagram-wrap">
+      <h3>Aufbereitungsmethoden im Vergleich</h3>
+      <svg viewBox="0 0 560 280" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <!-- Kirsche oben -->
+        <ellipse cx="280" cy="30" rx="35" ry="22" fill="#C0392B"/>
+        <text x="280" y="35" text-anchor="middle" fill="white" font-size="12" font-weight="bold">Kirsche</text>
+        <!-- Arrow down -->
+        <line x1="280" y1="52" x2="280" y2="72" stroke="#555" stroke-width="1.5" marker-end="url(#arr)"/>
+
+        <!-- Decision box -->
+        <rect x="200" y="72" width="160" height="36" rx="6" fill="#6B3A2A"/>
+        <text x="280" y="94" text-anchor="middle" fill="white" font-size="12">Aufbereitungsentscheidung</text>
+
+        <!-- Three branches -->
+        <!-- Natural arrow left -->
+        <line x1="200" y1="90" x2="80" y2="130" stroke="#C0392B" stroke-width="1.5"/>
+        <!-- Honey arrow middle -->
+        <line x1="280" y1="108" x2="280" y2="130" stroke="#F39C12" stroke-width="1.5"/>
+        <!-- Washed arrow right -->
+        <line x1="360" y1="90" x2="480" y2="130" stroke="#1976D2" stroke-width="1.5"/>
+
+        <!-- Natural box -->
+        <rect x="20" y="130" width="120" height="52" rx="8" fill="#FDECEA"/>
+        <text x="80" y="150" text-anchor="middle" fill="#C0392B" font-size="12" font-weight="bold">Natural</text>
+        <text x="80" y="166" text-anchor="middle" fill="#555" font-size="10">Ganze Kirsche</text>
+        <text x="80" y="178" text-anchor="middle" fill="#555" font-size="10">trocknet (3–6 Wo.)</text>
+
+        <!-- Honey box -->
+        <rect x="220" y="130" width="120" height="52" rx="8" fill="#FFF3CD"/>
+        <text x="280" y="150" text-anchor="middle" fill="#E67E22" font-size="12" font-weight="bold">Honey</text>
+        <text x="280" y="166" text-anchor="middle" fill="#555" font-size="10">Schale entfernt,</text>
+        <text x="280" y="178" text-anchor="middle" fill="#555" font-size="10">Mucilage bleibt</text>
+
+        <!-- Washed box -->
+        <rect x="420" y="130" width="120" height="52" rx="8" fill="#E3F2FD"/>
+        <text x="480" y="150" text-anchor="middle" fill="#1565C0" font-size="12" font-weight="bold">Washed</text>
+        <text x="480" y="166" text-anchor="middle" fill="#555" font-size="10">Schale + Mucilage</text>
+        <text x="480" y="178" text-anchor="middle" fill="#555" font-size="10">entfernt, ferment.</text>
+
+        <!-- Arrows to result -->
+        <line x1="80" y1="182" x2="80" y2="215" stroke="#C0392B" stroke-width="1.5"/>
+        <line x1="280" y1="182" x2="280" y2="215" stroke="#F39C12" stroke-width="1.5"/>
+        <line x1="480" y1="182" x2="480" y2="215" stroke="#1976D2" stroke-width="1.5"/>
+
+        <!-- Result boxes -->
+        <rect x="20" y="215" width="120" height="40" rx="6" fill="#C0392B"/>
+        <text x="80" y="230" text-anchor="middle" fill="white" font-size="10">Fruchtig, Wein-artig</text>
+        <text x="80" y="246" text-anchor="middle" fill="white" font-size="10">Viel Körper</text>
+
+        <rect x="220" y="215" width="120" height="40" rx="6" fill="#E67E22"/>
+        <text x="280" y="230" text-anchor="middle" fill="white" font-size="10">Süß, karamellig</text>
+        <text x="280" y="246" text-anchor="middle" fill="white" font-size="10">Mittlerer Körper</text>
+
+        <rect x="420" y="215" width="120" height="40" rx="6" fill="#1565C0"/>
+        <text x="480" y="230" text-anchor="middle" fill="white" font-size="10">Klar, frisch, sauber</text>
+        <text x="480" y="246" text-anchor="middle" fill="white" font-size="10">Helle Säure</text>
+
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 Z" fill="#555"/>
+          </marker>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- ===== 4. RÖSTUNG ===== -->
+  <div class="section" id="roestung">
+    <div class="section-header">
+      <span class="section-icon">🔥</span>
+      <div><h2>Die Röstung</h2></div>
+    </div>
+
+    <div class="card">
+      <h3>Röstphasen</h3>
+      <p>Beim Rösten durchläuft die Bohne mehrere physikalisch-chemische Phasen:</p>
+      <ol style="margin-top:0.8rem">
+        <li><strong>Trocknungsphase</strong> (~100–160 °C): Feuchtigkeit verdampft (8–12 % → 1–2 %)</li>
+        <li><strong>Maillard-Phase</strong> (~140–180 °C): Aminosäuren + reduzierende Zucker reagieren → Brauntöne, über 800 Aromaverbindungen entstehen</li>
+        <li><strong>First Crack</strong> (~196 °C): CO₂-Druck sprengt die Zellstruktur — hörbares Knacken, Bohne dehnt sich aus</li>
+        <li><strong>Entwicklungsphase</strong>: Nach First Crack — Röstgrad-Entscheidung des Rösters</li>
+        <li><strong>Second Crack</strong> (~224 °C): Weitere Zellulose-Zersetzung, Öle treten aus → dunkle Röstungen</li>
+      </ol>
+    </div>
+
+    <!-- SVG: Rösttemperaturkurve -->
+    <div class="diagram-wrap">
+      <h3>Rösttemperaturkurve (ROR – Rate of Rise)</h3>
+      <svg viewBox="0 0 560 260" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background -->
+        <rect width="560" height="260" fill="#FFF9F5" rx="8"/>
+        <!-- Grid -->
+        <line x1="60" y1="20" x2="60" y2="210" stroke="#DDD" stroke-width="1"/>
+        <line x1="60" y1="210" x2="530" y2="210" stroke="#DDD" stroke-width="1"/>
+        <line x1="60" y1="150" x2="530" y2="150" stroke="#EEE" stroke-width="1"/>
+        <line x1="60" y1="90" x2="530" y2="90" stroke="#EEE" stroke-width="1"/>
+        <!-- Y axis labels -->
+        <text x="50" y="215" text-anchor="end" fill="#888" font-size="11">100°</text>
+        <text x="50" y="155" text-anchor="end" fill="#888" font-size="11">170°</text>
+        <text x="50" y="95" text-anchor="end" fill="#888" font-size="11">200°</text>
+        <text x="50" y="35" text-anchor="end" fill="#888" font-size="11">230°</text>
+        <!-- X axis labels -->
+        <text x="60" y="225" text-anchor="middle" fill="#888" font-size="11">0</text>
+        <text x="175" y="225" text-anchor="middle" fill="#888" font-size="11">3 min</text>
+        <text x="290" y="225" text-anchor="middle" fill="#888" font-size="11">6 min</text>
+        <text x="400" y="225" text-anchor="middle" fill="#888" font-size="11">9 min</text>
+        <text x="530" y="225" text-anchor="middle" fill="#888" font-size="11">12 min</text>
+        <!-- Axis titles -->
+        <text x="295" y="248" text-anchor="middle" fill="#888" font-size="11">Zeit</text>
+        <text x="14" y="120" fill="#888" font-size="11" transform="rotate(-90,14,120)">Temperatur (°C)</text>
+
+        <!-- Temperature curve -->
+        <polyline points="60,210 100,205 150,195 200,175 240,155 270,130 300,110 320,92 340,80 360,70 390,58 410,45 440,35 470,30 510,28"
+          fill="none" stroke="#C8873A" stroke-width="2.5" stroke-linejoin="round"/>
+
+        <!-- First Crack marker -->
+        <line x1="320" y1="20" x2="320" y2="210" stroke="#E74C3C" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="322" y="35" fill="#E74C3C" font-size="11" font-weight="bold">First Crack</text>
+        <text x="322" y="47" fill="#E74C3C" font-size="10">~196°C</text>
+
+        <!-- Second Crack marker -->
+        <line x1="440" y1="20" x2="440" y2="210" stroke="#8B0000" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <text x="442" y="35" fill="#8B0000" font-size="11" font-weight="bold">2nd Crack</text>
+        <text x="442" y="47" fill="#8B0000" font-size="10">~224°C</text>
+
+        <!-- Turning point -->
+        <circle cx="100" cy="205" r="4" fill="#4CAF50"/>
+        <text x="88" y="196" fill="#4CAF50" font-size="10">Turning Point</text>
+
+        <!-- Roast zones -->
+        <rect x="320" y="200" width="60" height="8" rx="2" fill="rgba(255,200,100,0.4)"/>
+        <rect x="380" y="200" width="60" height="8" rx="2" fill="rgba(200,100,50,0.4)"/>
+        <rect x="440" y="200" width="70" height="8" rx="2" fill="rgba(100,30,10,0.4)"/>
+        <text x="350" y="195" text-anchor="middle" fill="#8B6914" font-size="9">Hell</text>
+        <text x="410" y="195" text-anchor="middle" fill="#A0522D" font-size="9">Mittel</text>
+        <text x="475" y="195" text-anchor="middle" fill="#6B2010" font-size="9">Dunkel</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h3>Röstgrade & Aromaprofil</h3>
+      <div class="roast-scale">
+        <div style="background:#C8A050">Light</div>
+        <div style="background:#A0703A">Medium</div>
+        <div style="background:#7A4A28">Med-Dark</div>
+        <div style="background:#4A2010">Dark</div>
+      </div>
+      <p style="font-size:0.88rem;color:var(--muted);margin-bottom:1rem">Farbe entspricht ungefährem Röstgrad (Agtron-Skala: 95 → 25)</p>
+      <table>
+        <tr><th>Röstgrad</th><th>Agtron</th><th>Aroma</th><th>Säure</th><th>Körper</th></tr>
+        <tr><td>Light (Hell)</td><td>70–95</td><td>Blumen, Beeren, komplex</td><td>Hoch</td><td>Leicht</td></tr>
+        <tr><td>Medium</td><td>50–70</td><td>Karamell, Nuss, Schokolade</td><td>Mittel</td><td>Mittel</td></tr>
+        <tr><td>Medium-Dark</td><td>35–50</td><td>Dunkle Schokolade, Gewürze</td><td>Niedrig</td><td>Voll</td></tr>
+        <tr><td>Dark (Dunkel)</td><td>25–35</td><td>Rauchartig, bitter, Röst</td><td>Sehr niedrig</td><td>Schwer</td></tr>
+      </table>
+      <button class="toggle-btn" onclick="toggleAdv(this)">🔬 Wissenschaftliche Tiefe zeigen</button>
+      <div class="advanced-content">
+        <strong>Maillard-Reaktion vs. Karamellisierung:</strong><br>
+        Beide Reaktionen erzeugen Bräunung und Aromen, sind aber chemisch verschieden. Die Maillard-Reaktion (150–180°C) ist eine Kondensationsreaktion zwischen reduzierenden Zuckern (Glucose, Fructose) und α-Aminogruppen von Aminosäuren → bildet Melanoidine und über 800 flüchtige Verbindungen inkl. Pyrazine, Furane, Thiole. Karamellisierung (>170°C) ist eine reine Zucker-Pyrolyse. Das Development Time Ratio (DTR) — Zeit nach First Crack / Gesamtröstzeit — sollte typischerweise 20–25 % betragen. Zu kurz → unreif ("baked"), zu lang → bitter, flach.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 5. EXTRAKTION ===== -->
+  <div class="section" id="extraktion">
+    <div class="section-header">
+      <span class="section-icon">⚗️</span>
+      <div><h2>Extraktion & Chemie</h2></div>
+    </div>
+
+    <div class="card">
+      <h3>Was ist Extraktion?</h3>
+      <p>Heißes Wasser löst lösliche Verbindungen aus dem gemahlenen Kaffee. Nicht alles löst sich gleichzeitig — <strong>Sequenz der Extraktion:</strong></p>
+      <ol style="margin-top:0.8rem">
+        <li>Zuerst: Salze, Säuren (schnell, ~0–18 % Ausbeute) → frisch, hell</li>
+        <li>Dann: Zucker, Maillard-Produkte → süß, karamellig</li>
+        <li>Zuletzt: Bittere Verbindungen, hohe Molekulargewichte (~22–28 %) → bitter, herb</li>
+      </ol>
+    </div>
+
+    <!-- SVG: Extraktionskurve -->
+    <div class="diagram-wrap">
+      <h3>Extraktionskurve — Aroma vs. Ausbeute</h3>
+      <svg viewBox="0 0 520 220" width="100%" xmlns="http://www.w3.org/2000/svg">
+        <rect width="520" height="220" fill="#FFF9F5" rx="8"/>
+        <!-- Axes -->
+        <line x1="50" y1="20" x2="50" y2="180" stroke="#888" stroke-width="1.5"/>
+        <line x1="50" y1="180" x2="490" y2="180" stroke="#888" stroke-width="1.5"/>
+        <!-- X labels -->
+        <text x="50" y="197" text-anchor="middle" fill="#888" font-size="10">0%</text>
+        <text x="170" y="197" text-anchor="middle" fill="#888" font-size="10">14%</text>
+        <text x="265" y="197" text-anchor="middle" fill="#888" font-size="10">18%</text>
+        <text x="360" y="197" text-anchor="middle" fill="#888" font-size="10">22%</text>
+        <text x="490" y="197" text-anchor="middle" fill="#888" font-size="10">28%</text>
+        <text x="270" y="212" text-anchor="middle" fill="#888" font-size="11">Extraktionsausbeute (TDS %)</text>
+        <!-- Ideal zone shading -->
+        <rect x="265" y="20" width="95" height="160" fill="rgba(74,124,89,0.12)" rx="4"/>
+        <text x="312" y="38" text-anchor="middle" fill="#4A7C59" font-size="10" font-weight="bold">IDEAL</text>
+        <text x="312" y="50" text-anchor="middle" fill="#4A7C59" font-size="9">18–22%</text>
+        <!-- Under-extraction zone -->
+        <rect x="50" y="20" width="215" height="160" fill="rgba(52,152,219,0.07)" rx="4"/>
+        <text x="158" y="38" text-anchor="middle" fill="#2980B9" font-size="10">Unterextrahiert</text>
+        <!-- Over-extraction zone -->
+        <rect x="360" y="20" width="130" height="160" fill="rgba(192,57,43,0.07)" rx="4"/>
+        <text x="425" y="38" text-anchor="middle" fill="#C0392B" font-size="10">Überextrahiert</text>
+
+        <!-- Flavor curve -->
+        <path d="M 50,170 Q 150,100 265,55 Q 310,42 360,48 Q 420,60 490,100"
+          fill="none" stroke="#C8873A" stroke-width="2.5"/>
+
+        <!-- Vertical dividers -->
+        <line x1="265" y1="20" x2="265" y2="180" stroke="#4A7C59" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <line x1="360" y1="20" x2="360" y2="180" stroke="#4A7C59" stroke-width="1.5" stroke-dasharray="5,3"/>
+
+        <!-- Annotations -->
+        <text x="158" y="155" text-anchor="middle" fill="#2980B9" font-size="10">Sauer, salzig</text>
+        <text x="158" y="167" text-anchor="middle" fill="#2980B9" font-size="10">dünn</text>
+        <text x="425" y="155" text-anchor="middle" fill="#C0392B" font-size="10">Bitter, herb</text>
+        <text x="425" y="167" text-anchor="middle" fill="#C0392B" font-size="10">trocken</text>
+
+        <!-- Y axis label -->
+        <text x="15" y="100" fill="#888" font-size="11" transform="rotate(-90,15,100)">Geschmack</text>
+      </svg>
+    </div>
+
+    <div class="card">
+      <h3>Wichtige Extraktionsvariablen</h3>
+      <table>
+        <tr><th>Variable</th><th>Wirkung bei Erhöhung</th><th>Typischer Wert</th></tr>
+        <tr><td><strong>Mahlgrad</strong> (feiner)</td><td>Mehr Extraktion, länger</td><td>Espresso: sehr fein</td></tr>
+        <tr><td><strong>Wassertemperatur</strong></td><td>Schnellere, stärkere Extraktion</td><td>90–96 °C</td></tr>
+        <tr><td><strong>Kontaktzeit</strong></td><td>Mehr Extraktion, Bitterkeit</td><td>Methode-abhängig</td></tr>
+        <tr><td><strong>Brew Ratio</strong></td><td>Mehr Kaffee = Stärke ↑, Yield ↓</td><td>1:15 – 1:17</td></tr>
+        <tr><td><strong>Turbulenz / Agitation</strong></td><td>Gleichmäßigere Extraktion</td><td>Gießtechnik</td></tr>
+      </table>
+      <button class="toggle-btn" onclick="toggleAdv(this)">🔬 Wissenschaftliche Tiefe zeigen</button>
+      <div class="advanced-content">
+        <strong>TDS (Total Dissolved Solids) & Brew Strength:</strong><br>
+        TDS misst Feststoffkonzentration im Getränk via Refraktometer (°Brix → TDS %). Die SCA-Brewing-Control-Chart definiert das "Golden Cup"-Ziel: TDS 1,15–1,35 % bei Filterkaffee, Extraktionsausbeute 18–22 %. Espresso liegt typischerweise bei TDS 8–12 %. Das Verhältnis TDS/Ausbeute gibt Hinweise auf Channeling (Wasser sucht sich Wege durch lockeres Kaffeemehl) oder ungleichmäßiges Mahlen.
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 6. ZUBEREITUNG ===== -->
+  <div class="section" id="zubereitung">
+    <div class="section-header">
+      <span class="section-icon">☕</span>
+      <div><h2>Zubereitungsmethoden</h2></div>
+    </div>
+
+    <!-- Method selector -->
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1.5rem">
+      <button class="brew-sel active" onclick="showBrew('espresso',this)">Espresso</button>
+      <button class="brew-sel" onclick="showBrew('pourover',this)">Pour-Over</button>
+      <button class="brew-sel" onclick="showBrew('french',this)">French Press</button>
+      <button class="brew-sel" onclick="showBrew('aero',this)">AeroPress</button>
+      <button class="brew-sel" onclick="showBrew('moka',this)">Moka Pot</button>
+      <button class="brew-sel" onclick="showBrew('cold',this)">Cold Brew</button>
+    </div>
+    <style>
+      .brew-sel { background: var(--white); border: 1.5px solid #e0d0c0; padding: 0.45rem 1rem; border-radius: 20px; cursor: pointer; font-family: inherit; font-size: 0.88rem; color: var(--text); transition: all 0.2s; }
+      .brew-sel:hover, .brew-sel.active { background: var(--caramel); color: white; border-color: var(--caramel); }
+    </style>
+
+    <div id="brew-espresso" class="brew-guide">
+      <div class="card">
+        <h3>Espresso ☕</h3>
+        <p><strong>Prinzip:</strong> Heißes Wasser wird unter hohem Druck (9 bar) durch fein gemahlenes Kaffeemehl gepresst. Ergibt ein konzentriertes, cremiges Getränk mit Crema.</p>
+        <p style="margin-top:0.6rem"><strong>Parameter:</strong> 7–9 g Kaffee · 25–30 ml Yield · 25–30 sec · 90–94 °C · 9 bar</p>
+      </div>
+      <div class="brew-steps">
+        <div class="brew-step"><p><strong>Portafilter vorbereiten:</strong> Siebträger reinigen und trocknen. Kaffeemehl sehr fein mahlen (ähnlich Puderzucker).</p></div>
+        <div class="brew-step"><p><strong>Dosieren:</strong> 7–9 g Kaffeemehl in den Siebträger. Oberfläche gleichmäßig verteilen.</p></div>
+        <div class="brew-step"><p><strong>Tampen:</strong> Mit dem Tamper gleichmäßig und senkrecht mit ca. 15 kg Druck pressen. Wichtig: Gleichmäßige Oberfläche.</p></div>
+        <div class="brew-step"><p><strong>Bezug starten:</strong> Siebträger einspannen, sofort starten. Pre-Infusion bei 3–4 bar für 3–5 sec empfohlen.</p></div>
+        <div class="brew-step"><p><strong>Ergebnis prüfen:</strong> Idealfluss: honigartiger Strahl, bernsteinfarben. Gesamtbezugszeit: 25–30 sec für ~25–30 ml.</p></div>
+      </div>
+      <div class="info-box">🎯 Crema-Qualität: Haselnussbraun, dicht, schmilzt langsam — ein Zeichen guter Extraktion und frischer Bohne.</div>
+    </div>
+
+    <div id="brew-pourover" class="brew-guide" style="display:none">
+      <div class="card">
+        <h3>Pour-Over (Filterkaffee) ☕</h3>
+        <p><strong>Prinzip:</strong> Heißes Wasser wird kontrolliert über Kaffeemehl gegossen, das in einem Papierfilter liegt. Gravity-based, langsame Extraktion.</p>
+        <p style="margin-top:0.6rem"><strong>Parameter:</strong> 15 g Kaffee · 250 ml Wasser · 1:16 Ratio · 92–96 °C · mittelfein · 2:30–3:30 min gesamt</p>
+      </div>
+      <div class="brew-steps">
+        <div class="brew-step"><p><strong>Filter einlegen & vorspülen:</strong> Papierfilter falten, einlegen, mit heißem Wasser spülen (entfernt Papiergeschmack, wärmt Gefäß vor). Wasser weggießen.</p></div>
+        <div class="brew-step"><p><strong>Kaffee mahlen & dosieren:</strong> Mittelfein mahlen (Salzkörner-Größe). 15 g in den vorgespu̎lten Filter.</p></div>
+        <div class="brew-step"><p><strong>Bloom (Vorbrühen):</strong> 30–40 ml Wasser gießen, alle Partikel benetzen. 30 Sek. warten. CO₂ entweicht → bessere Extraktion.</p></div>
+        <div class="brew-step"><p><strong>Hauptguss:</strong> In 2–3 Guss-Schritten restliches Wasser langsam in kreisenden Bewegungen gießen. Nicht den Filter-Rand benetzen.</p></div>
+        <div class="brew-step"><p><strong>Abschluss:</strong> Gesamte Brühzeit ~3 min. Kaffee sofort genießen oder kurz warten bis 70–75 °C Trinktemperatur.</p></div>
+      </div>
+    </div>
+
+    <div id="brew-french" class="brew-guide" style="display:none">
+      <div class="card">
+        <h3>French Press 🫖</h3>
+        <p><strong>Prinzip:</strong> Kaffeemehl wird direkt im Wasser ziehen gelassen (Immersion), dann durch Metallfilter gedrückt. Kein Papierfilter = mehr Öle & Körper im Getränk.</p>
+        <p style="margin-top:0.6rem"><strong>Parameter:</strong> 30 g Kaffee · 500 ml Wasser · 1:16 · 93–96 °C · grob gemahlen · 4 min</p>
+      </div>
+      <div class="brew-steps">
+        <div class="brew-step"><p><strong>Vorwärmen:</strong> Heißes Wasser in die French Press, kurz schwenken, weggießen.</p></div>
+        <div class="brew-step"><p><strong>Kaffee dosieren:</strong> Grob mahlen (wie Rohrzucker). 30 g pro 500 ml Wasser einfüllen.</p></div>
+        <div class="brew-step"><p><strong>Aufgießen:</strong> Gesamtes Wasser (93–96 °C) auf einmal aufgießen. Kurz umrühren, damit alle Partikel nass werden.</p></div>
+        <div class="brew-step"><p><strong>Ziehen lassen:</strong> Deckel auflegen (Stempel hochgezogen), genau 4 Minuten warten. Timer benutzen.</p></div>
+        <div class="brew-step"><p><strong>Pressen & sofort einschenken:</strong> Stempel langsam und gleichmäßig drücken. Kaffee sofort einschenken — sonst extrahiert er weiter und wird bitter.</p></div>
+      </div>
+    </div>
+
+    <div id="brew-aero" class="brew-guide" style="display:none">
+      <div class="card">
+        <h3>AeroPress ⬇️</h3>
+        <p><strong>Prinzip:</strong> Kombination aus Immersion und Druck. Sehr vielseitig — kurze Brühzeit, sehr cleaner Cup, viele Rezeptvariationen möglich.</p>
+        <p style="margin-top:0.6rem"><strong>Parameter:</strong> 15–18 g · 200–250 ml · 80–96 °C · 1–2 min · fein bis mittelfein</p>
+      </div>
+      <div class="brew-steps">
+        <div class="brew-step"><p><strong>Papierfilter einlegen:</strong> Filterdeckel mit Papierfilter bestücken, mit etwas Wasser spülen und auf stabiler Tasse befestigen.</p></div>
+        <div class="brew-step"><p><strong>Kaffee einfüllen:</strong> AeroPress auf Tasse stellen (Standard-Methode), gemahlenen Kaffee einfüllen.</p></div>
+        <div class="brew-step"><p><strong>Wasser aufgießen:</strong> Wasser aufgießen (Temperatur je nach Röstgrad: hell → 96°C, dunkel → 80–85°C). Kurz rühren.</p></div>
+        <div class="brew-step"><p><strong>Ziehen lassen:</strong> Je nach Rezept 60–90 Sekunden warten (Stempel leicht reindrücken, um Luft rauszulassen).</p></div>
+        <div class="brew-step"><p><strong>Pressen:</strong> Stempel gleichmäßig in 20–30 Sek. runterdrücken. Beim Zischen stoppen — das ist Luft, nicht Kaffee.</p></div>
+      </div>
+    </div>
+
+    <div id="brew-moka" class="brew-guide" style="display:none">
+      <div class="card">
+        <h3>Moka Pot (Espressokanne) 🫙</h3>
+        <p><strong>Prinzip:</strong> Dampfdruck (1–2 bar) drückt Wasser aus dem unteren Behälter durch den Kaffeemehlkorb in den oberen Teil. Stärker als Filterkaffee, aber kein echter Espresso.</p>
+        <p style="margin-top:0.6rem"><strong>Parameter:</strong> Mittelfein · Korb vollständig füllen · mittlere Hitze · ~5 min</p>
+      </div>
+      <div class="brew-steps">
+        <div class="brew-step"><p><strong>Wasser einfüllen:</strong> Unteren Kessel mit heißem Wasser bis zur Überdruckventil-Linie füllen (mit heißem Wasser → verkürzt Kontaktzeit mit heißem Metall).</p></div>
+        <div class="brew-step"><p><strong>Kaffee dosieren:</strong> Mittelfein gemahlenen Kaffee in den Korb füllen — leicht andrücken, aber nicht tampen.</p></div>
+        <div class="brew-step"><p><strong>Zusammenschrauben:</strong> Sieb mit Dichtung einlegen, Teile fest zusammenschrauben.</p></div>
+        <div class="brew-step"><p><strong>Erhitzen:</strong> Auf mittlerer Hitze stellen. Deckel offen lassen zum Beobachten.</p></div>
+        <div class="brew-step"><p><strong>Vom Herd nehmen:</strong> Sobald Kaffee blasig und hell wird (Spucken hören), Herd ausschalten, Basis kurz unter kaltes Wasser halten um Überextraktion zu stoppen.</p></div>
+      </div>
+    </div>
+
+    <div id="brew-cold" class="brew-guide" style="display:none">
+      <div class="card">
+        <h3>Cold Brew 🧊</h3>
+        <p><strong>Prinzip:</strong> Kaffeemehl wird über 12–24 Stunden in kaltem Wasser kalt extrahiert. Niedrige Temperatur → andere Löslichkeitskurve → geringere titrierbare Gesamtsäure (bei ähnlichem pH), milder, glatter. Der Koffeingehalt hängt vom Verhältnis ab — als Konzentrat ist er höher als Filterkaffee.</p>
+        <p style="margin-top:0.6rem"><strong>Parameter:</strong> 80–100 g grob gemahlener Kaffee · 1 Liter Wasser · 12–24 h · Kühlschrank · 1:10 Ratio (Konzentrat)</p>
+      </div>
+      <div class="brew-steps">
+        <div class="brew-step"><p><strong>Mahlen:</strong> Sehr grob mahlen — wie Meersalz. Zu fein = trübes, bitteres Ergebnis.</p></div>
+        <div class="brew-step"><p><strong>Mischen:</strong> Kaffee und kaltes Wasser in Gefäß verrühren. Verhältnis 1:10 für Konzentrat, 1:15 für trinkfertigen Cold Brew.</p></div>
+        <div class="brew-step"><p><strong>Ziehen lassen:</strong> Abdecken und 12–24 h im Kühlschrank ziehen lassen. Länger = stärker, aber aufpassen: >24 h kann bitter werden.</p></div>
+        <div class="brew-step"><p><strong>Filtern:</strong> Durch Papierfilter oder feines Sieb filtern. Für klaren Cold Brew zweimal filtern.</p></div>
+        <div class="brew-step"><p><strong>Servieren:</strong> Konzentrat 1:1 mit Wasser oder Milch verdünnen. Hält im Kühlschrank ~2 Wochen.</p></div>
+      </div>
+      <div class="info-box">💡 Cold Brew ist nicht wegen niedrigerem pH milder, sondern weil weniger titrierbare Säuren extrahiert werden (u.a. Chlorogensäure). Koffein: Als unverdünntes Konzentrat (1:10) enthält Cold Brew mehr Koffein als Filterkaffee — beim trinkfertigen 1:15-Ansatz sind die Werte vergleichbar. <em>(Nature Scientific Reports, 2018)</em></div>
+    </div>
+  </div>
+
+  <!-- ===== 7. QUIZ ===== -->
+  <div class="section" id="quiz">
+    <div class="section-header">
+      <span class="section-icon">🧠</span>
+      <div><h2>Wissenstest</h2></div>
+    </div>
+    <p style="margin-bottom:1.5rem;color:var(--muted);font-size:0.92rem">Teste dein Wissen aus allen Kapiteln. Klicke auf eine Antwort, um sie zu prüfen.</p>
+
+    <div class="quiz-container" id="quiz-container"></div>
+    <div class="quiz-score" id="quiz-score"></div>
+    <button class="quiz-btn" id="quiz-reset-btn" onclick="resetQuiz()" style="display:none;margin:1rem auto">🔄 Quiz wiederholen</button>
+  </div>
+
+  <!-- ===== 8. GLOSSAR ===== -->
+  <div class="section" id="glossar">
+    <div class="section-header">
+      <span class="section-icon">📖</span>
+      <div><h2>Glossar</h2></div>
+    </div>
+    <input class="glossar-search" type="text" placeholder="Begriff suchen…" oninput="filterGlossar(this.value)" id="gSearch"/>
+    <div id="glossar-list"></div>
+  </div>
+
+</main>
+
+<script>
+// ─── NAVIGATION ───────────────────────────────────────────────
+const sections = ['pflanze','anbau','aufbereitung','roestung','extraktion','zubereitung','quiz','glossar'];
+const progress = { pflanze:1, anbau:2, aufbereitung:3, roestung:4, extraktion:5, zubereitung:6, quiz:7, glossar:8 };
+
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('#main-nav button').forEach((b,i) => {
+    b.classList.toggle('active', sections[i] === id);
+  });
+  const p = (progress[id] / 8) * 100;
+  document.getElementById('progress').style.width = p + '%';
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+// ─── ADVANCED TOGGLE ──────────────────────────────────────────
+function toggleAdv(btn) {
+  const content = btn.nextElementSibling;
+  const open = content.style.display === 'block';
+  content.style.display = open ? 'none' : 'block';
+  btn.textContent = open ? '🔬 Wissenschaftliche Tiefe zeigen' : '🔼 Weniger anzeigen';
+}
+
+// ─── BREW METHOD SELECTOR ─────────────────────────────────────
+function showBrew(id, btn) {
+  document.querySelectorAll('.brew-guide').forEach(g => g.style.display = 'none');
+  document.getElementById('brew-' + id).style.display = 'block';
+  document.querySelectorAll('.brew-sel').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ─── QUIZ ─────────────────────────────────────────────────────
+const quizData = [
+  {
+    q: "Welche Kaffeeart enthält mehr Koffein?",
+    opts: ["Arabica", "Robusta", "Liberica", "Beide gleich"],
+    correct: 1,
+    explanation: "Robusta enthält 1,7–3,5 % Koffein, Arabica nur 0,8–1,4 %. Das Koffein dient der Pflanze als natürliches Insektizid."
+  },
+  {
+    q: "Was passiert beim 'First Crack' während der Röstung?",
+    opts: ["Der Kaffee wird gemahlen", "CO₂-Druck bricht die Zellstruktur der Bohne", "Die Bohne verliert ihre Farbe", "Wasser beginnt zu kochen"],
+    correct: 1,
+    explanation: "Beim First Crack (~196°C) baut sich CO₂ im Inneren der Bohne auf und sprengt die Zellstruktur. Das hörbare Knacken zeigt an, dass die Bohne den mittelhellen Bereich erreicht."
+  },
+  {
+    q: "Was ist das Hauptmerkmal der Washed-Aufbereitung (Nassmethode)?",
+    opts: ["Die Bohne wird in der ganzen Kirsche getrocknet", "Fruchtfleisch und Mucilage werden entfernt, sauberes Aromaprofil", "Mucilage bleibt an der Bohne", "Die Bohne wird eingefroren"],
+    correct: 1,
+    explanation: "Beim Washed Processing werden Schale und Mucilage vollständig entfernt. Das Ergebnis ist ein klares, sauberes Aromaprofil mit heller Säure — das Origin-Terroir kommt besonders deutlich zum Ausdruck."
+  },
+  {
+    q: "Welche optimale Extraktionsausbeute empfiehlt die SCA für Filterkaffee?",
+    opts: ["8–12 %", "14–17 %", "18–22 %", "25–30 %"],
+    correct: 2,
+    explanation: "Die SCA (Specialty Coffee Association) definiert 18–22 % Extraktionsausbeute als 'Golden Cup'-Ziel für Filterkaffee. Darunter ist der Kaffee unterextrahiert (sauer, dünn), darüber überextrahiert (bitter, herb)."
+  },
+  {
+    q: "Warum wird bei der Pour-Over-Methode ein 'Bloom' (Vorbrühen) empfohlen?",
+    opts: ["Um den Kaffee zu kühlen", "Um CO₂ aus dem Kaffeemehl entweichen zu lassen", "Um den Filter zu wärmen", "Um Zucker aufzulösen"],
+    correct: 1,
+    explanation: "Frisch gerösteter Kaffee enthält viel CO₂. Beim Bloom (30–40 ml Wasser, 30 Sek. warten) entweicht dieses Gas. CO₂ wirkt als Barriere zwischen Wasser und Kaffee — ein guter Bloom ermöglicht gleichmäßigere Extraktion."
+  },
+  {
+    q: "Was bedeutet 'Terroir' im Kaffeekontext?",
+    opts: ["Die Röstmethode", "Umweltfaktoren wie Boden, Klima und Höhenlage, die das Aroma beeinflussen", "Der Koffeingehalt", "Die Verarbeitungstemperatur"],
+    correct: 1,
+    explanation: "Terroir (aus dem Französischen) beschreibt den Einfluss von Anbauumgebung — Boden, Mikroklima, Höhenlage, Niederschlag — auf das Aromaprofil der Bohne. Ähnlich wie beim Wein bestimmt das Terroir maßgeblich Säure, Körper und Aromanoten."
+  },
+  {
+    q: "Welche Aufbereitungsmethode produziert typischerweise das fruchtigste, weinigste Aromaprofil?",
+    opts: ["Washed", "Honey", "Natural", "Steam-Processed"],
+    correct: 2,
+    explanation: "Natural-Aufbereitung (Trockenverfahren) lässt die Bohne innerhalb der ganzen Kirsche fermentieren. Dabei nehmen die Bohnen intensive Frucht- und Weinaromen aus Fruchtfleisch und Mucilage auf."
+  },
+  {
+    q: "Was ist der Unterschied zwischen Arabica und Robusta auf chromosomaler Ebene?",
+    opts: ["Beide haben 22 Chromosomen", "Arabica hat 44, Robusta 22 Chromosomen", "Arabica hat 22, Robusta 44 Chromosomen", "Beide haben 44 Chromosomen"],
+    correct: 1,
+    explanation: "Arabica ist tetraploid (44 Chromosomen — ein natürlicher Hybrid aus C. canephora × C. eugenioides), Robusta (C. canephora) ist diploid (22). Dies erklärt die genetische Komplexität und damit das komplexere Aromapotential von Arabica."
+  }
+];
+
+let answered = [];
+
+function buildQuiz() {
+  const container = document.getElementById('quiz-container');
+  answered = new Array(quizData.length).fill(false);
+  container.innerHTML = '';
+  quizData.forEach((q, qi) => {
+    const div = document.createElement('div');
+    div.className = 'quiz-q';
+    div.id = 'qq' + qi;
+    let optsHTML = q.opts.map((o,oi) =>
+      `<button onclick="answerQ(${qi},${oi},this)">${o}</button>`
+    ).join('');
+    div.innerHTML = `
+      <p class="question">Frage ${qi+1}: ${q.q}</p>
+      <div class="quiz-options">${optsHTML}</div>
+      <div class="quiz-feedback" id="qf${qi}"></div>
+    `;
+    container.appendChild(div);
+  });
+  document.getElementById('quiz-score').style.display = 'none';
+  document.getElementById('quiz-reset-btn').style.display = 'none';
+}
+
+function answerQ(qi, oi, btn) {
+  if (answered[qi]) return;
+  answered[qi] = true;
+  const q = quizData[qi];
+  const opts = btn.parentElement.querySelectorAll('button');
+  opts.forEach(b => b.disabled = true);
+  const fb = document.getElementById('qf' + qi);
+  if (oi === q.correct) {
+    btn.classList.add('correct');
+    fb.textContent = '✅ Richtig! ' + q.explanation;
+    fb.className = 'quiz-feedback correct show';
+  } else {
+    btn.classList.add('wrong');
+    opts[q.correct].classList.add('correct');
+    fb.textContent = '❌ Leider falsch. ' + q.explanation;
+    fb.className = 'quiz-feedback wrong show';
+  }
+  if (answered.every(Boolean)) {
+    const score = answered.reduce((acc, _, i) => {
+      const btns = document.querySelectorAll(`#qq${i} .quiz-options button`);
+      return acc + ([...btns].some(b => b.classList.contains('correct') && !b.classList.contains('wrong')) ? 1 : 0);
+    }, 0);
+    // recalculate correctly
+    let correct = 0;
+    quizData.forEach((_, i) => {
+      const btn = document.querySelector(`#qq${i} .quiz-options button.correct`);
+      if (btn && !document.querySelector(`#qq${i} .quiz-options button.wrong`)) correct++;
+    });
+    // Actually: count by checking answered correctly
+    let c = 0;
+    quizData.forEach((q2, i) => {
+      const btns = document.querySelectorAll(`#qq${i} .quiz-options button`);
+      btns.forEach((b,idx) => { if(b.classList.contains('correct') && idx === q2.correct) c++; });
+    });
+    const sc = document.getElementById('quiz-score');
+    sc.style.display = 'block';
+    sc.textContent = `Ergebnis: ${c} von ${quizData.length} richtig — ${Math.round(c/quizData.length*100)} %`;
+    document.getElementById('quiz-reset-btn').style.display = 'block';
+  }
+}
+
+function resetQuiz() { buildQuiz(); }
+
+// ─── GLOSSAR ──────────────────────────────────────────────────
+const glossarData = [
+  { term: "Arabica", def: "Coffea arabica — tetraploide Kaffeeart mit 44 Chromosomen (natürlicher Hybrid aus C. canephora × C. eugenioides). Macht ca. 60–70 % der Weltproduktion aus. Komplexes Aroma, Koffeingehalt 1,0–1,5 %." },
+  { term: "Robusta", def: "Coffea canephora — diploide Kaffeeart mit 22 Chromosomen. Höherer Koffeingehalt (1,7–3,5 %), kräftiger, bitterer, widerstandsfähiger gegen Schädlinge." },
+  { term: "Terroir", def: "Gesamtheit der Umweltfaktoren eines Anbaugebiets — Boden, Klima, Höhenlage, Niederschlag — die das Aromaprofil des Kaffees prägen." },
+  { term: "Exokarp", def: "Die äußere Schale der Kaffeekirsche (Skin). Beim Natural-Processing bleibt sie während der Trocknung erhalten." },
+  { term: "Mesokarp / Pulp", def: "Das Fruchtfleisch der Kaffeekirsche, das beim Washed Processing maschinell entfernt wird." },
+  { term: "Mucilage", def: "Klebrige Schleimschicht zwischen Pulp und Pergament. Enthält Zucker, die bei der Fermentation und beim Honey-Process Aromen beeinflussen." },
+  { term: "Pergament (Parchment)", def: "Hartes Häutchen (Endokarp) direkt um die Kaffeebohne. Wird beim Entpergamentieren (Hulling) nach der Trocknung entfernt." },
+  { term: "Silverskin", def: "Hauchdünnes Häutchen direkt um die Rohbohne. Kann beim Rösten zu Chaff werden." },
+  { term: "First Crack", def: "Beim Rösten bei ~196°C hörbares Knacken, wenn CO₂-Druck die Zellstruktur der Bohne bricht. Markiert den Beginn heller Röstungen." },
+  { term: "Second Crack", def: "Zweites Knacken beim Rösten bei ~224°C. Zellulose zersetzt sich, Öle treten aus. Markiert dunkle Röstungen." },
+  { term: "Maillard-Reaktion", def: "Chemische Reaktion zwischen Aminosäuren und reduzierenden Zuckern bei Hitze (ab ~150°C). Erzeugt Bräunung und über 800 Aromaverbindungen in der Kaffeebohne." },
+  { term: "Development Time Ratio (DTR)", def: "Zeit nach dem First Crack geteilt durch Gesamtröstzeit. Idealwert: 20–25 %. Zu kurz → baked, zu lang → bitter." },
+  { term: "Agtron-Skala", def: "Standardisierte Skala zur Messung des Röstgrades via Nah-Infrarot-Spektrometrie. Helle Röstung: ~70–95, Dunkel: ~25–35." },
+  { term: "Extraktion", def: "Lösung löslicher Verbindungen aus gemahlenem Kaffee durch Wasser. Sequenz: Säuren → Zucker → Bitterstoffe." },
+  { term: "TDS (Total Dissolved Solids)", def: "Konzentration gelöster Feststoffe im Kaffeegetränk, gemessen per Refraktometer. Filterkaffee: 1,15–1,35 %, Espresso: 8–12 %." },
+  { term: "Extraktionsausbeute", def: "Prozentualer Anteil der aus dem Kaffeemehl gelösten Verbindungen. SCA-Ideal für Filterkaffee: 18–22 %." },
+  { term: "Brew Ratio", def: "Verhältnis von Kaffeemenge zu Wassermenge. Typisch: 1:15 bis 1:17 für Filterkaffee, 1:2 für Espresso." },
+  { term: "Bloom (Vorbrühen)", def: "Kurzes Benetzen des Kaffeemehls vor dem Hauptguss. Lässt CO₂ entweichen und ermöglicht gleichmäßigere Extraktion." },
+  { term: "Channeling", def: "Ungleichmäßige Wasserverteilung beim Espresso — Wasser sucht Wege durch lockere Stellen im Puck. Führt zu Überextraktion an bestimmten Stellen." },
+  { term: "Crema", def: "Goldbraune Emulsion aus CO₂, Ölen und Wasser auf dem Espresso. Entsteht durch den hohen Druck (9 bar) der Espressomaschine." },
+  { term: "Kaffeegürtel", def: "Zone zwischen 25° Nord und 25° Süd, in der Kaffee angebaut wird. Optimale Kombination aus Temperatur, Niederschlag und Jahreszeiten." },
+  { term: "Washed Processing", def: "Aufbereitungsmethode, bei der Fruchtfleisch und Mucilage vollständig entfernt werden. Ergebnis: klares, sauberes Aromaprofil mit heller Säure." },
+  { term: "Natural Processing", def: "Aufbereitungsmethode, bei der die ganze Kirsche getrocknet wird. Ergebnis: intensiv fruchtig, weinig, viel Körper." },
+  { term: "Honey Process", def: "Hybrid-Aufbereitungsmethode: Fruchtfleisch entfernt, Mucilage bleibt teilweise. Varianten: Yellow, Red, Black Honey je nach verbleibender Mucilage-Menge." },
+  { term: "Selective Picking", def: "Manuelle Ernte, bei der ausschließlich reife Kirschen gepflückt werden. Höchste Qualität, aber aufwendig und teuer." },
+  { term: "Cold Brew", def: "Kaltextraktion: Kaffee wird 12–24 h in kaltem Wasser gezogen. Niedrige Temperatur → weniger Säure, mehr Süße, höhere Koffeinkonzentration bei typischen Rezepten." },
+  { term: "Portafilter / Siebträger", def: "Metallhalter für den Kaffeepuck in der Espressomaschine. Bestimmt die Wasserverteilung und damit die Extraktionsqualität." },
+  { term: "Pre-Infusion", def: "Kurzes Vornetzen des Espresso-Pucks mit niedrigem Druck (3–4 bar) vor dem Hauptdruck. Reduziert Channeling, gleichmäßigere Extraktion." },
+];
+
+function buildGlossar() {
+  const list = document.getElementById('glossar-list');
+  list.innerHTML = '';
+  glossarData.sort((a,b) => a.term.localeCompare(b.term)).forEach(g => {
+    const div = document.createElement('div');
+    div.className = 'glossar-entry';
+    div.dataset.term = g.term.toLowerCase();
+    div.innerHTML = `<h4>${g.term}</h4><p>${g.def}</p>`;
+    list.appendChild(div);
+  });
+}
+
+function filterGlossar(val) {
+  const v = val.toLowerCase();
+  document.querySelectorAll('.glossar-entry').forEach(e => {
+    e.classList.toggle('hidden', !e.dataset.term.includes(v) && !e.querySelector('p').textContent.toLowerCase().includes(v));
+  });
+}
+
+// ─── INIT ─────────────────────────────────────────────────────
+buildQuiz();
+buildGlossar();
+</script>
+</body>
+</html>
